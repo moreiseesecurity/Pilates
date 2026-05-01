@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import MoveLibrary from './MoveLibrary' // Fixed the path here
 
 function App() {
   const [activeRoutine, setActiveRoutine] = useState<string | null>(null);
@@ -23,6 +24,14 @@ function App() {
       </header>
 
       <main>
+        {/* --- ADD THIS NEW SECTION BELOW --- */}
+        <MoveLibrary /> 
+        
+        <div style={{ margin: '40px 0 20px 0', fontWeight: 'bold', fontSize: '18px' }}>
+          Your Saved Classes
+        </div>
+        {/* ---------------------------------- */}
+
         {routines.map((r) => (
           <div 
             key={r.id}
@@ -53,10 +62,11 @@ function App() {
           right: '20px',
           background: '#a8b5a2',
           color: 'white',
-          padding: 'env(safe-area-inset-top) 15px env(safe-area-inset-bottom) 15px',
+          padding: '15px', // Use standard padding here if safe-area is in index.html
           borderRadius: '12px',
           textAlign: 'center',
-          fontWeight: 'bold'
+          fontWeight: 'bold',
+          boxShadow: '0 10px 20px rgba(0,0,0,0.1)'
         }}>
           Starting {activeRoutine}...
         </div>
