@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { ReactElement } from 'react';
 import { supabase } from './supabaseClient';
 
 interface Move {
@@ -12,15 +13,59 @@ interface MoveLibraryProps {
 }
 
 const PILATES_ICONS = [
-  { value: 'spine', label: 'Spine', svg: <svg viewBox="0 0 32 32" width="28" height="28"><ellipse cx="16" cy="6" rx="4" ry="4" fill="none" stroke="#a8b5a2" strokeWidth="2"/><line x1="16" y1="10" x2="16" y2="26" stroke="#a8b5a2" strokeWidth="2.5" strokeLinecap="round"/><line x1="16" y1="14" x2="12" y2="17" stroke="#a8b5a2" strokeWidth="2" strokeLinecap="round"/><line x1="16" y1="18" x2="20" y2="21" stroke="#a8b5a2" strokeWidth="2" strokeLinecap="round"/><line x1="16" y1="22" x2="12" y2="25" stroke="#a8b5a2" strokeWidth="2" strokeLinecap="round"/></svg> },
-  { value: 'legs', label: 'Legs', svg: <svg viewBox="0 0 32 32" width="28" height="28"><ellipse cx="16" cy="5" rx="4" ry="3" fill="none" stroke="#a8b5a2" strokeWidth="2"/><path d="M12 8 Q10 16 11 26" stroke="#a8b5a2" strokeWidth="2.5" fill="none" strokeLinecap="round"/><path d="M20 8 Q22 16 21 26" stroke="#a8b5a2" strokeWidth="2.5" fill="none" strokeLinecap="round"/></svg> },
-  { value: 'core', label: 'Core', svg: <svg viewBox="0 0 32 32" width="28" height="28"><ellipse cx="16" cy="16" rx="10" ry="13" fill="none" stroke="#a8b5a2" strokeWidth="2"/><ellipse cx="16" cy="16" rx="5" ry="7" fill="none" stroke="#a8b5a2" strokeWidth="1.5" strokeDasharray="3 2"/></svg> },
-  { value: 'stretch', label: 'Stretch', svg: <svg viewBox="0 0 32 32" width="28" height="28"><ellipse cx="16" cy="6" rx="3" ry="3" fill="none" stroke="#a8b5a2" strokeWidth="2"/><line x1="16" y1="9" x2="16" y2="18" stroke="#a8b5a2" strokeWidth="2.5" strokeLinecap="round"/><path d="M8 13 L16 15 L24 13" stroke="#a8b5a2" strokeWidth="2" fill="none" strokeLinecap="round"/><path d="M16 18 Q13 24 11 29" stroke="#a8b5a2" strokeWidth="2" fill="none" strokeLinecap="round"/><path d="M16 18 Q19 24 21 29" stroke="#a8b5a2" strokeWidth="2" fill="none" strokeLinecap="round"/></svg> },
+  {
+    value: 'arms', label: 'Arms',
+    svg: <svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="#a8b5a2" strokeWidth="2" strokeLinecap="round">
+      <circle cx="16" cy="5" r="3"/>
+      <line x1="16" y1="8" x2="16" y2="16"/>
+      <line x1="16" y1="12" x2="7" y2="9"/>
+      <line x1="7" y1="9" x2="4" y2="14"/>
+      <line x1="16" y1="12" x2="25" y2="9"/>
+      <line x1="25" y1="9" x2="28" y2="14"/>
+      <line x1="16" y1="16" x2="13" y2="26"/>
+      <line x1="16" y1="16" x2="19" y2="26"/>
+    </svg>
+  },
+  {
+    value: 'legs', label: 'Legs',
+    svg: <svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="#a8b5a2" strokeWidth="2" strokeLinecap="round">
+      <circle cx="16" cy="5" r="3"/>
+      <line x1="16" y1="8" x2="16" y2="18"/>
+      <line x1="10" y1="12" x2="22" y2="12"/>
+      <line x1="16" y1="18" x2="11" y2="26"/>
+      <line x1="11" y1="26" x2="8" y2="26"/>
+      <line x1="16" y1="18" x2="21" y2="26"/>
+      <line x1="21" y1="26" x2="24" y2="26"/>
+    </svg>
+  },
+  {
+    value: 'core', label: 'Core',
+    svg: <svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="#a8b5a2" strokeWidth="2" strokeLinecap="round">
+      <circle cx="16" cy="5" r="3"/>
+      <line x1="16" y1="8" x2="16" y2="18"/>
+      <line x1="10" y1="12" x2="22" y2="12"/>
+      <ellipse cx="16" cy="13" rx="5" ry="4" strokeDasharray="2 2"/>
+      <line x1="16" y1="18" x2="13" y2="26"/>
+      <line x1="16" y1="18" x2="19" y2="26"/>
+    </svg>
+  },
+  {
+    value: 'stretch', label: 'Stretch',
+    svg: <svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="#a8b5a2" strokeWidth="2" strokeLinecap="round">
+      <circle cx="16" cy="5" r="3"/>
+      <path d="M16 8 Q16 14 10 16"/>
+      <path d="M16 8 Q16 14 22 16"/>
+      <path d="M10 16 Q6 20 8 26"/>
+      <path d="M22 16 Q26 20 24 26"/>
+      <line x1="8" y1="26" x2="4" y2="26"/>
+      <line x1="24" y1="26" x2="28" y2="26"/>
+    </svg>
+  },
 ];
 
 export default function MoveLibrary({ onAddToClass }: MoveLibraryProps) {
   const [name, setName] = useState('');
-  const [selectedIcon, setSelectedIcon] = useState('spine');
+  const [selectedIcon, setSelectedIcon] = useState('arms');
   const [allMoves, setAllMoves] = useState<Move[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -53,7 +98,7 @@ export default function MoveLibrary({ onAddToClass }: MoveLibraryProps) {
     setSaving(false);
   };
 
-  const iconMap = Object.fromEntries(PILATES_ICONS.map(i => [i.value, i.svg]));
+  const iconMap = Object.fromEntries(PILATES_ICONS.map(i => [i.value, i.svg])) as Record<string, ReactElement>;
 
   return (
     <div style={{ background: 'white', borderRadius: '16px', padding: '20px', marginBottom: '20px' }}>
@@ -103,7 +148,7 @@ export default function MoveLibrary({ onAddToClass }: MoveLibraryProps) {
           {allMoves.map(move => (
             <div key={move.id} style={{ border: '1px solid #f0f0f0', borderRadius: '12px', padding: '12px', textAlign: 'center' }}>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '6px' }}>
-                {iconMap[move.icon] ?? iconMap['spine']}
+                {iconMap[move.icon] ?? iconMap['arms']}
               </div>
               <div style={{ fontSize: '13px', fontWeight: '500', marginBottom: '8px' }}>{move.name}</div>
               <button

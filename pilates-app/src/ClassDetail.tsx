@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import type { ReactElement } from 'react';
 import { supabase } from './supabaseClient';
-
 
 interface Move {
   id: string;
@@ -23,11 +23,43 @@ interface ClassDetailProps {
   onDeleted: (id: string) => void;
 }
 
-const ICON_SVG: Record<string, React.ReactElement> = {
-  spine: <svg viewBox="0 0 32 32" width="22" height="22"><ellipse cx="16" cy="6" rx="4" ry="4" fill="none" stroke="#a8b5a2" strokeWidth="2"/><line x1="16" y1="10" x2="16" y2="26" stroke="#a8b5a2" strokeWidth="2.5" strokeLinecap="round"/><line x1="16" y1="14" x2="12" y2="17" stroke="#a8b5a2" strokeWidth="2" strokeLinecap="round"/><line x1="16" y1="18" x2="20" y2="21" stroke="#a8b5a2" strokeWidth="2" strokeLinecap="round"/><line x1="16" y1="22" x2="12" y2="25" stroke="#a8b5a2" strokeWidth="2" strokeLinecap="round"/></svg>,
-  legs: <svg viewBox="0 0 32 32" width="22" height="22"><ellipse cx="16" cy="5" rx="4" ry="3" fill="none" stroke="#a8b5a2" strokeWidth="2"/><path d="M12 8 Q10 16 11 26" stroke="#a8b5a2" strokeWidth="2.5" fill="none" strokeLinecap="round"/><path d="M20 8 Q22 16 21 26" stroke="#a8b5a2" strokeWidth="2.5" fill="none" strokeLinecap="round"/></svg>,
-  core: <svg viewBox="0 0 32 32" width="22" height="22"><ellipse cx="16" cy="16" rx="10" ry="13" fill="none" stroke="#a8b5a2" strokeWidth="2"/><ellipse cx="16" cy="16" rx="5" ry="7" fill="none" stroke="#a8b5a2" strokeWidth="1.5" strokeDasharray="3 2"/></svg>,
-  stretch: <svg viewBox="0 0 32 32" width="22" height="22"><ellipse cx="16" cy="6" rx="3" ry="3" fill="none" stroke="#a8b5a2" strokeWidth="2"/><line x1="16" y1="9" x2="16" y2="18" stroke="#a8b5a2" strokeWidth="2.5" strokeLinecap="round"/><path d="M8 13 L16 15 L24 13" stroke="#a8b5a2" strokeWidth="2" fill="none" strokeLinecap="round"/><path d="M16 18 Q13 24 11 29" stroke="#a8b5a2" strokeWidth="2" fill="none" strokeLinecap="round"/><path d="M16 18 Q19 24 21 29" stroke="#a8b5a2" strokeWidth="2" fill="none" strokeLinecap="round"/></svg>,
+const ICON_SVG: Record<string, ReactElement> = {
+  arms: <svg viewBox="0 0 32 32" width="22" height="22" fill="none" stroke="#a8b5a2" strokeWidth="2" strokeLinecap="round">
+    <circle cx="16" cy="5" r="3"/>
+    <line x1="16" y1="8" x2="16" y2="16"/>
+    <line x1="16" y1="12" x2="7" y2="9"/>
+    <line x1="7" y1="9" x2="4" y2="14"/>
+    <line x1="16" y1="12" x2="25" y2="9"/>
+    <line x1="25" y1="9" x2="28" y2="14"/>
+    <line x1="16" y1="16" x2="13" y2="26"/>
+    <line x1="16" y1="16" x2="19" y2="26"/>
+  </svg>,
+  legs: <svg viewBox="0 0 32 32" width="22" height="22" fill="none" stroke="#a8b5a2" strokeWidth="2" strokeLinecap="round">
+    <circle cx="16" cy="5" r="3"/>
+    <line x1="16" y1="8" x2="16" y2="18"/>
+    <line x1="10" y1="12" x2="22" y2="12"/>
+    <line x1="16" y1="18" x2="11" y2="26"/>
+    <line x1="11" y1="26" x2="8" y2="26"/>
+    <line x1="16" y1="18" x2="21" y2="26"/>
+    <line x1="21" y1="26" x2="24" y2="26"/>
+  </svg>,
+  core: <svg viewBox="0 0 32 32" width="22" height="22" fill="none" stroke="#a8b5a2" strokeWidth="2" strokeLinecap="round">
+    <circle cx="16" cy="5" r="3"/>
+    <line x1="16" y1="8" x2="16" y2="18"/>
+    <line x1="10" y1="12" x2="22" y2="12"/>
+    <ellipse cx="16" cy="13" rx="5" ry="4" strokeDasharray="2 2"/>
+    <line x1="16" y1="18" x2="13" y2="26"/>
+    <line x1="16" y1="18" x2="19" y2="26"/>
+  </svg>,
+  stretch: <svg viewBox="0 0 32 32" width="22" height="22" fill="none" stroke="#a8b5a2" strokeWidth="2" strokeLinecap="round">
+    <circle cx="16" cy="5" r="3"/>
+    <path d="M16 8 Q16 14 10 16"/>
+    <path d="M16 8 Q16 14 22 16"/>
+    <path d="M10 16 Q6 20 8 26"/>
+    <path d="M22 16 Q26 20 24 26"/>
+    <line x1="8" y1="26" x2="4" y2="26"/>
+    <line x1="24" y1="26" x2="28" y2="26"/>
+  </svg>,
 };
 
 const INTENSITY_OPTIONS = ['Low', 'Medium', 'High'];
@@ -87,7 +119,6 @@ export default function ClassDetail({ routine, onBack, onUpdated, onDeleted }: C
 
   return (
     <div style={{ minHeight: '100vh', background: '#f9f5f2', paddingBottom: '100px' }}>
-      {/* Header */}
       <div style={{ background: 'white', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid #f0f0f0', position: 'sticky', top: 0, zIndex: 10 }}>
         <button onClick={onBack} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', padding: '4px', color: '#4a4a4a' }}>←</button>
         {editingTitle ? (
@@ -105,7 +136,6 @@ export default function ClassDetail({ routine, onBack, onUpdated, onDeleted }: C
       </div>
 
       <div style={{ padding: '20px' }}>
-        {/* Stats */}
         <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
           {[
             { label: 'Moves', value: moves.length },
@@ -128,7 +158,6 @@ export default function ClassDetail({ routine, onBack, onUpdated, onDeleted }: C
           </div>
         </div>
 
-        {/* Move list */}
         <h4 style={{ margin: '0 0 12px 0', fontWeight: '500', fontSize: '14px', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Class Flow</h4>
 
         {moves.length === 0 && (
@@ -142,7 +171,7 @@ export default function ClassDetail({ routine, onBack, onUpdated, onDeleted }: C
           }}>
             <span style={{ fontSize: '13px', color: '#ccc', minWidth: '20px', textAlign: 'right' }}>{idx + 1}</span>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#f0f4ef', borderRadius: '8px', flexShrink: 0 }}>
-              {ICON_SVG[move.icon] ?? ICON_SVG['spine']}
+              {ICON_SVG[move.icon] ?? ICON_SVG['arms']}
             </div>
             <span style={{ flex: 1, fontSize: '15px', fontWeight: '500' }}>{move.name}</span>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
@@ -154,7 +183,6 @@ export default function ClassDetail({ routine, onBack, onUpdated, onDeleted }: C
         ))}
       </div>
 
-      {/* Save bar */}
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '16px 20px calc(16px + env(safe-area-inset-bottom))', background: 'white', borderTop: '1px solid #f0f0f0' }}>
         <button
           onClick={handleSave}
