@@ -11,22 +11,22 @@ export default defineConfig({
         name: 'Madhuri Pilates',
         short_name: 'Pilates',
         description: 'Personal Pilates workout tracker',
-        theme_color: '#f9f5f2', // Matches the background we set in App.tsx
+        theme_color: '#f9f5f2',
         background_color: '#f9f5f2',
-        display: 'standalone', // THIS is what hides the Safari URL bar
+        display: 'standalone',
         orientation: 'portrait',
         icons: [
           {
-            src: 'https://placehold.co/192x192/a8b5a2/white?text=P',
+            src: '/icon-192.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any'
+            purpose: 'any maskable'
           },
           {
-            src: 'https://placehold.co/512x512/a8b5a2/white?text=Pilates',
+            src: '/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any'
+            purpose: 'any maskable'
           }
         ]
       }
