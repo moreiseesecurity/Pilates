@@ -92,7 +92,7 @@ function App() {
     <div style={{
       fontFamily: 'sans-serif', padding: '20px', backgroundColor: '#f9f5f2',
       minHeight: '100vh', color: '#4a4a4a',
-      paddingBottom: currentClassBuild.length > 0 ? '320px' : '40px',
+      paddingBottom: currentClassBuild.length > 0 ? '420px' : '40px',
       transition: 'padding-bottom 0.3s ease'
     }}>
       <header style={{ marginBottom: '30px' }}>
