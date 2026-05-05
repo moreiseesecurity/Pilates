@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabaseClient'
 import MoveLibrary from './MoveLibrary'
+import ClassDetail from './ClassDetail'
 
 interface Move {
   id: string;
@@ -11,18 +12,17 @@ interface Move {
 interface Routine {
   id: string;
   title: string;
-  duration: number; // Changed to number to match int8 DB type
+  duration: number;
   intensity: string;
-  moves: Move[]; 
+  moves: Move[];
 }
 
 function App() {
-  const [activeRoutine, setActiveRoutine] = useState<string | null>(null);
+  const [viewingRoutine, setViewingRoutine] = useState<Routine | null>(null);
   const [currentClassBuild, setCurrentClassBuild] = useState<Move[]>([]);
   const [savedRoutines, setSavedRoutines] = useState<Routine[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // FETCH: Get classes from Supabase on load
   useEffect(() => {
     fetchRoutines();
   }, []);
@@ -47,16 +47,15 @@ function App() {
     setCurrentClassBuild((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // SAVE: Push the new class to Supabase
   const handleSaveClass = async () => {
     const className = prompt("Name this class:", `Flow ${savedRoutines.length + 1}`);
     if (!className) return;
 
     const newRoutine = {
       title: className,
-      duration: currentClassBuild.length * 2, // Sent as a pure number for int8 compatibility
+      duration: currentClassBuild.length * 2,
       intensity: 'Medium',
-      moves: currentClassBuild // This saves as a JSONB array in Supabase
+      moves: currentClassBuild
     };
 
     const { data, error } = await supabase
@@ -69,13 +68,29 @@ function App() {
     } else if (data && data.length > 0) {
       setSavedRoutines([data[0], ...savedRoutines]);
       setCurrentClassBuild([]);
-      alert("Class saved to Supabase!");
     }
   };
 
+  if (viewingRoutine) {
+    return (
+      <ClassDetail
+        routine={viewingRoutine}
+        onBack={() => setViewingRoutine(null)}
+        onUpdated={(updated) => {
+          setSavedRoutines(prev => prev.map(r => r.id === updated.id ? updated : r));
+          setViewingRoutine(null);
+        }}
+        onDeleted={(id) => {
+          setSavedRoutines(prev => prev.filter(r => r.id !== id));
+          setViewingRoutine(null);
+        }}
+      />
+    );
+  }
+
   return (
-    <div style={{ 
-      fontFamily: 'sans-serif', padding: '20px', backgroundColor: '#f9f5f2', 
+    <div style={{
+      fontFamily: 'sans-serif', padding: '20px', backgroundColor: '#f9f5f2',
       minHeight: '100vh', color: '#4a4a4a',
       paddingBottom: currentClassBuild.length > 0 ? '320px' : '40px',
       transition: 'padding-bottom 0.3s ease'
@@ -86,37 +101,37 @@ function App() {
       </header>
 
       <main>
-        <MoveLibrary onAddToClass={handleAddToClass} /> 
-        
+        <MoveLibrary onAddToClass={handleAddToClass} />
+
         <div style={{ margin: '40px 0 20px 0', fontWeight: 'bold', fontSize: '18px' }}>
           Your Saved Classes
         </div>
 
         {loading ? (
           <p>Loading your library...</p>
+        ) : savedRoutines.length === 0 ? (
+          <p style={{ color: '#aaa', fontSize: '14px' }}>No classes saved yet. Build one above!</p>
         ) : (
           savedRoutines.map((r) => (
-            <div 
+            <div
               key={r.id}
-              onClick={() => setActiveRoutine(r.title)}
+              onClick={() => setViewingRoutine(r)}
               style={{
                 background: 'white', padding: '20px', borderRadius: '15px', marginBottom: '15px',
                 boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-                border: activeRoutine === r.title ? '2px solid #a8b5a2' : '2px solid transparent',
+                border: '2px solid transparent',
                 cursor: 'pointer'
               }}
             >
               <h3 style={{ margin: '0 0 5px 0' }}>{r.title}</h3>
               <div style={{ fontSize: '14px', opacity: 0.6 }}>
-                {/* Added 'min' back here for display purposes */}
-                <span>{r.duration} min</span> • <span>{r.intensity} Intensity</span>
+                <span>{r.duration} min</span> • <span>{r.intensity} Intensity</span> • <span>{r.moves?.length ?? 0} moves</span>
               </div>
             </div>
           ))
         )}
       </main>
 
-      {/* --- DRAWER --- */}
       {currentClassBuild.length > 0 && (
         <div style={{
           position: 'fixed', bottom: '0', left: '0', right: '0', background: 'white',
@@ -129,7 +144,7 @@ function App() {
             <h3 style={{ margin: 0 }}>Class Flow ({currentClassBuild.length})</h3>
             <button onClick={() => setCurrentClassBuild([])} style={{ color: '#ff6b6b', border: 'none', background: 'none', fontWeight: 'bold' }}>Clear</button>
           </div>
-          
+
           <div style={{ overflowY: 'auto', flexGrow: 1, marginBottom: '15px' }}>
             {currentClassBuild.map((move, idx) => (
               <div key={`${move.id}-${idx}`} style={{
@@ -138,7 +153,6 @@ function App() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <span style={{ opacity: 0.4, fontSize: '12px' }}>{idx + 1}</span>
-                  <span>{move.icon}</span>
                   <span style={{ fontWeight: '500' }}>{move.name}</span>
                 </div>
                 <button onClick={() => removeFromClass(idx)} style={{ border: 'none', background: 'none', fontSize: '20px', color: '#ccc' }}>✕</button>
@@ -146,7 +160,7 @@ function App() {
             ))}
           </div>
 
-          <button 
+          <button
             onClick={handleSaveClass}
             style={{
               width: '100%', background: '#a8b5a2', color: 'white', border: 'none',
@@ -158,7 +172,7 @@ function App() {
         </div>
       )}
     </div>
-  )
+  );
 }
 
 export default App
