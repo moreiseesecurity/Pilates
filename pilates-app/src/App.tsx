@@ -11,7 +11,7 @@ interface Move {
 interface Routine {
   id: string;
   title: string;
-  duration: string;
+  duration: number; // Changed to number to match int8 DB type
   intensity: string;
   moves: Move[]; 
 }
@@ -54,7 +54,7 @@ function App() {
 
     const newRoutine = {
       title: className,
-      duration: `${currentClassBuild.length * 2} min`, 
+      duration: currentClassBuild.length * 2, // Sent as a pure number for int8 compatibility
       intensity: 'Medium',
       moves: currentClassBuild // This saves as a JSONB array in Supabase
     };
@@ -66,7 +66,7 @@ function App() {
 
     if (error) {
       alert("Error saving class: " + error.message);
-    } else {
+    } else if (data && data.length > 0) {
       setSavedRoutines([data[0], ...savedRoutines]);
       setCurrentClassBuild([]);
       alert("Class saved to Supabase!");
@@ -108,14 +108,15 @@ function App() {
             >
               <h3 style={{ margin: '0 0 5px 0' }}>{r.title}</h3>
               <div style={{ fontSize: '14px', opacity: 0.6 }}>
-                <span>{r.duration}</span> • <span>{r.intensity} Intensity</span>
+                {/* Added 'min' back here for display purposes */}
+                <span>{r.duration} min</span> • <span>{r.intensity} Intensity</span>
               </div>
             </div>
           ))
         )}
       </main>
 
-      {/* --- DRAWER (Same UI, New Handler) --- */}
+      {/* --- DRAWER --- */}
       {currentClassBuild.length > 0 && (
         <div style={{
           position: 'fixed', bottom: '0', left: '0', right: '0', background: 'white',
