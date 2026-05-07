@@ -119,7 +119,7 @@ export default function ClassDetail({ routine, onBack, onUpdated, onDeleted }: C
 
   return (
     <div style={{ minHeight: '100vh', background: '#f9f5f2', paddingBottom: '100px' }}>
-      <div style={{ background: 'white', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid #f0f0f0', position: 'sticky', top: 0, zIndex: 10 }}>
+      <div style={{ background: 'white', padding: '16px 20px', paddingTop: 'max(16px, env(safe-area-inset-top))',display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid #f0f0f0', position: 'sticky', top: 0, zIndex: 10 }}>
         <button onClick={onBack} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', padding: '4px', color: '#4a4a4a' }}>←</button>
         {editingTitle ? (
           <input
