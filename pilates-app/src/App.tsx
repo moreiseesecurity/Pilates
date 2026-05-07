@@ -17,29 +17,107 @@ interface Routine {
   moves: Move[];
 }
 
+const CORRECT_PIN = '0609';
+
+function PinScreen({ onUnlock }: { onUnlock: () => void }) {
+  const [pin, setPin] = useState('');
+  const [error, setError] = useState(false);
+
+  const handleDigit = (digit: string) => {
+    if (pin.length >= 4) return;
+    const next = pin + digit;
+    setPin(next);
+    setError(false);
+    if (next.length === 4) {
+      if (next === CORRECT_PIN) {
+        sessionStorage.setItem('pilates_unlocked', 'true');
+        onUnlock();
+      } else {
+        setTimeout(() => { setPin(''); setError(true); }, 400);
+      }
+    }
+  };
+
+  const handleDelete = () => setPin(prev => prev.slice(0, -1));
+
+  return (
+    <div style={{
+      minHeight: '100vh', background: '#f9f5f2', display: 'flex',
+      flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px'
+    }}>
+      <h1 style={{ fontSize: '26px', fontWeight: '300', marginBottom: '8px', color: '#4a4a4a' }}>Pilates Studio</h1>
+      <p style={{ color: '#aaa', fontSize: '14px', marginBottom: '48px' }}>Enter your PIN to continue</p>
+
+      {/* Dots */}
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '48px' }}>
+        {[0,1,2,3].map(i => (
+          <div key={i} style={{
+            width: '16px', height: '16px', borderRadius: '50%',
+            background: i < pin.length ? (error ? '#e88' : '#a8b5a2') : '#ddd',
+            transition: 'background 0.15s'
+          }}/>
+        ))}
+      </div>
+
+      {error && <p style={{ color: '#e88', fontSize: '13px', marginBottom: '24px', marginTop: '-36px' }}>Incorrect PIN</p>}
+
+      {/* Keypad */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 72px)', gap: '12px' }}>
+        {['1','2','3','4','5','6','7','8','9','','0','⌫'].map((d, i) => (
+          <button
+            key={i}
+            onClick={() => d === '⌫' ? handleDelete() : d !== '' ? handleDigit(d) : null}
+            disabled={d === ''}
+            style={{
+              width: '72px', height: '72px', borderRadius: '50%', border: 'none',
+              background: d === '' ? 'transparent' : 'white',
+              fontSize: d === '⌫' ? '20px' : '22px',
+              fontWeight: '400', color: '#4a4a4a', cursor: d === '' ? 'default' : 'pointer',
+              boxShadow: d === '' ? 'none' : '0 2px 8px rgba(0,0,0,0.08)'
+            }}
+          >
+            {d}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function App() {
+  const [unlocked, setUnlocked] = useState(false);
   const [viewingRoutine, setViewingRoutine] = useState<Routine | null>(null);
   const [currentClassBuild, setCurrentClassBuild] = useState<Move[]>([]);
   const [savedRoutines, setSavedRoutines] = useState<Routine[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchRoutines();
+    if (sessionStorage.getItem('pilates_unlocked') === 'true') {
+      setUnlocked(true);
+    }
   }, []);
 
+  useEffect(() => {
+    if (unlocked) fetchRoutines();
+  }, [unlocked]);
+
   async function fetchRoutines() {
-  setLoading(true);
-  const { data, error } = await supabase
-    .from('classes')
-    .select('*')
-    .order('created_at', { ascending: false });
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('classes')
+      .select('*')
+      .order('id', { ascending: false });
 
-  console.log('fetch result:', data, error);
+    console.log('fetch result:', data, error);
+    if (error) console.error('Error fetching routines:', error);
+    else if (data) setSavedRoutines(data);
+    setLoading(false);
+  }
 
-  if (error) console.error('Error fetching routines:', error);
-  else if (data) setSavedRoutines(data);
-  setLoading(false);
-}
+  const handleLock = () => {
+    sessionStorage.removeItem('pilates_unlocked');
+    setUnlocked(false);
+  };
 
   const handleAddToClass = (move: Move) => {
     setCurrentClassBuild((prev) => [...prev, move]);
@@ -73,6 +151,8 @@ function App() {
     }
   };
 
+  if (!unlocked) return <PinScreen onUnlock={() => setUnlocked(true)} />;
+
   if (viewingRoutine) {
     return (
       <ClassDetail
@@ -97,9 +177,18 @@ function App() {
       paddingBottom: currentClassBuild.length > 0 ? '420px' : '40px',
       transition: 'padding-bottom 0.3s ease'
     }}>
-      <header style={{ marginBottom: '30px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: '300' }}>Pilates Studio</h1>
-        <p style={{ opacity: 0.7 }}>Cloud Sync Active</p>
+      <header style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1 style={{ fontSize: '28px', fontWeight: '300', margin: 0 }}>Pilates Studio</h1>
+          <p style={{ opacity: 0.7, margin: '4px 0 0 0', fontSize: '14px' }}>Madhuri</p>
+        </div>
+        <button
+          onClick={handleLock}
+          title="Lock app"
+          style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', opacity: 0.4 }}
+        >
+          🔒
+        </button>
       </header>
 
       <main>
