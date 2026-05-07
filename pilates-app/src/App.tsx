@@ -45,7 +45,7 @@ function PinScreen({ onUnlock }: { onUnlock: () => void }) {
       minHeight: '100vh', background: '#f9f5f2', display: 'flex',
       flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px'
     }}>
-      <h1 style={{ fontSize: '26px', fontWeight: '300', marginBottom: '8px', color: '#4a4a4a' }}>Pilates Studio</h1>
+      <h1 style={{ fontSize: '26px', fontWeight: '300', marginBottom: '8px', color: '#4a4a4a' }}>Madhuri's Pilates Studio</h1>
       <p style={{ color: '#aaa', fontSize: '14px', marginBottom: '48px' }}>Enter your PIN to continue</p>
 
       <div style={{ display: 'flex', gap: '16px', marginBottom: '48px' }}>
@@ -180,7 +180,7 @@ function App() {
     }}>
       <header style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: '28px', fontWeight: '300', margin: 0 }}>Pilates Studio</h1>
+          <h1 style={{ fontSize: '28px', fontWeight: '300', margin: 0 }}>Madhuri's Pilates Studio</h1>
           <p style={{ opacity: 0.7, margin: '4px 0 0 0', fontSize: '14px' }}>Madhuri</p>
         </div>
         <button
