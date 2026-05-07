@@ -48,7 +48,6 @@ function PinScreen({ onUnlock }: { onUnlock: () => void }) {
       <h1 style={{ fontSize: '26px', fontWeight: '300', marginBottom: '8px', color: '#4a4a4a' }}>Pilates Studio</h1>
       <p style={{ color: '#aaa', fontSize: '14px', marginBottom: '48px' }}>Enter your PIN to continue</p>
 
-      {/* Dots */}
       <div style={{ display: 'flex', gap: '16px', marginBottom: '48px' }}>
         {[0,1,2,3].map(i => (
           <div key={i} style={{
@@ -61,7 +60,6 @@ function PinScreen({ onUnlock }: { onUnlock: () => void }) {
 
       {error && <p style={{ color: '#e88', fontSize: '13px', marginBottom: '24px', marginTop: '-36px' }}>Incorrect PIN</p>}
 
-      {/* Keypad */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 72px)', gap: '12px' }}>
         {['1','2','3','4','5','6','7','8','9','','0','⌫'].map((d, i) => (
           <button
@@ -108,7 +106,6 @@ function App() {
       .select('*')
       .order('id', { ascending: false });
 
-    console.log('fetch result:', data, error);
     if (error) console.error('Error fetching routines:', error);
     else if (data) setSavedRoutines(data);
     setLoading(false);
@@ -172,9 +169,13 @@ function App() {
 
   return (
     <div style={{
-      fontFamily: 'sans-serif', padding: '20px', backgroundColor: '#f9f5f2',
-      minHeight: '100vh', color: '#4a4a4a',
+      fontFamily: 'sans-serif',
+      padding: '20px',
+      paddingTop: 'max(20px, env(safe-area-inset-top))',
       paddingBottom: currentClassBuild.length > 0 ? '420px' : '40px',
+      backgroundColor: '#f9f5f2',
+      minHeight: '100vh',
+      color: '#4a4a4a',
       transition: 'padding-bottom 0.3s ease'
     }}>
       <header style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
