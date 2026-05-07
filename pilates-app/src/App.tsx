@@ -28,16 +28,18 @@ function App() {
   }, []);
 
   async function fetchRoutines() {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('classes')
-      .select('*')
-      .order('created_at', { ascending: false });
+  setLoading(true);
+  const { data, error } = await supabase
+    .from('classes')
+    .select('*')
+    .order('created_at', { ascending: false });
 
-    if (error) console.error('Error fetching routines:', error);
-    else if (data) setSavedRoutines(data);
-    setLoading(false);
-  }
+  console.log('fetch result:', data, error);
+
+  if (error) console.error('Error fetching routines:', error);
+  else if (data) setSavedRoutines(data);
+  setLoading(false);
+}
 
   const handleAddToClass = (move: Move) => {
     setCurrentClassBuild((prev) => [...prev, move]);
